@@ -84,8 +84,15 @@ class AuthServiceImpl(
     @Transactional
     override fun logout(): Unit {
         val username = securityUtil.getCurrentUser().name
-        tokenRepository.deleteByUsername(username)
+        tokenRepository.deleteById(username)
+        validateTokenDeleted(username)
     }
+    private fun validateTokenDeleted(username: String) {
+        if (tokenRepository.existsById(username)) {
+            throw CustomException(JwtError.TOKEN_DELETE_FAILED)
+        }
+    }
+
 
     private fun validateRefreshToken(username: String, refreshToken: String) {
         val savedToken = tokenRepository.findByUsername(username)
@@ -93,7 +100,7 @@ class AuthServiceImpl(
 
         // Timing Attack 방지
         if (!MessageDigest.isEqual(
-                savedToken.token.toByteArray(),
+                savedToken.refreshToken.toByteArray(),
                 refreshToken.toByteArray()
             )) {
             throw CustomException(JwtError.INVALID_REFRESH_TOKEN)
