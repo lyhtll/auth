@@ -23,28 +23,28 @@ class AuthController(
     @PostMapping("/signup")
     override fun signup(
         @Valid @RequestBody signUpRequest: SignUpRequest
-    ) : ResponseEntity<BaseResponse<Unit>>{
+    ) : ResponseEntity<BaseResponse.Empty> {
         authService.signup(signUpRequest)
-        return BaseResponse.of(null,HttpStatus.CREATED.value())
+        return BaseResponse.success(HttpStatus.CREATED.value())
     }
 
     @PostMapping("/login")
     override fun login(
         @Valid @RequestBody loginRequest: LoginRequest
-    ): ResponseEntity<BaseResponse<TokenResponse>>{
+    ): ResponseEntity<BaseResponse.Success<TokenResponse>>{
         return BaseResponse.of(authService.login(loginRequest), HttpStatus.OK.value())
     }
 
     @PostMapping("/reissue")
     override fun reissue(
         @Valid @RequestBody reissueRequest: ReissueRequest
-    ): ResponseEntity<BaseResponse<TokenResponse>>{
+    ): ResponseEntity<BaseResponse.Success<TokenResponse>>{
         return BaseResponse.of(authService.reissue(reissueRequest), HttpStatus.OK.value())
     }
 
     @PostMapping("/logout")
-    override fun logout(): ResponseEntity<BaseResponse<Unit>>{
+    override fun logout(): ResponseEntity<BaseResponse.Empty>{
         authService.logout()
-        return BaseResponse.of(null, HttpStatus.OK.value())
+        return BaseResponse.success(HttpStatus.OK.value())
     }
 }

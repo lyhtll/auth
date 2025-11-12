@@ -9,5 +9,5 @@ import org.springframework.http.ResponseEntity
 @Tag(name = "User", description = "사용자 API")
 interface UserDocs {
     @Operation(summary = "사용자 정보 조회", description = "사용자의 정보를 조회합니다.")
-    fun getMe(): ResponseEntity<BaseResponse<GetMeResponse>>
+    fun getMe(): ResponseEntity<BaseResponse.Success<GetMeResponse>>
 }

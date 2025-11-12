@@ -16,7 +16,7 @@ class UserController(
     private val userService: UserService
 ): UserDocs {
     @GetMapping("/me")
-    override fun getMe(): ResponseEntity<BaseResponse<GetMeResponse>>{
+    override fun getMe(): ResponseEntity<BaseResponse.Success<GetMeResponse>>{
         return BaseResponse.of(userService.getMe(), HttpStatus.OK.value())
     }
 }
