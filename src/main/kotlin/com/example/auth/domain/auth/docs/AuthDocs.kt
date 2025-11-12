@@ -29,4 +29,10 @@ interface AuthDocs {
         security = [SecurityRequirement(name = "bearerAuth")]
     )
     fun reissue(reissueRequest: ReissueRequest): ResponseEntity<BaseResponse<TokenResponse>>
+
+    @Operation(
+        summary = "로그아웃",
+        description = "사용자를 로그아웃 처리합니다"
+    )
+    fun logout(): ResponseEntity<BaseResponse<Unit>>
 }

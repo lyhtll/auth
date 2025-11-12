@@ -9,4 +9,5 @@ interface AuthService {
     fun signup(request: SignUpRequest): Unit
     fun login(request: LoginRequest): TokenResponse
     fun reissue(request: ReissueRequest): TokenResponse
+    fun logout(): Unit
 }

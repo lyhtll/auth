@@ -14,6 +14,7 @@ import com.example.auth.global.security.jwt.error.JwtError
 import com.example.auth.global.security.jwt.provider.JwtProvider
 import com.example.auth.global.security.jwt.response.TokenResponse
 import com.example.auth.global.security.jwt.type.TokenType
+import com.example.auth.global.security.util.SecurityUtil
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -24,7 +25,8 @@ class AuthServiceImpl(
     private val userRepository: UserRepository,
     private val passwordEncoder: PasswordEncoder,
     private val jwtProvider: JwtProvider,
-    private val tokenRepository: RefreshTokenRepository
+    private val tokenRepository: RefreshTokenRepository,
+    private val securityUtil: SecurityUtil
 ) : AuthService {
 
     companion object {
@@ -32,7 +34,7 @@ class AuthServiceImpl(
     }
 
     @Transactional
-    override fun signup(request: SignUpRequest) {
+    override fun signup(request: SignUpRequest) : Unit {
         validateUsernameNotExists(request.name)
 
         val user = User(
@@ -79,6 +81,11 @@ class AuthServiceImpl(
         return tokens
     }
 
+    @Transactional
+    override fun logout(): Unit {
+        val username = securityUtil.getCurrentUser().name
+        tokenRepository.deleteByUsername(username)
+    }
 
     private fun validateRefreshToken(username: String, refreshToken: String) {
         val savedToken = tokenRepository.findByUsername(username)

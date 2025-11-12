@@ -41,4 +41,10 @@ class AuthController(
     ): ResponseEntity<BaseResponse<TokenResponse>>{
         return BaseResponse.of(authService.reissue(reissueRequest), HttpStatus.OK.value())
     }
+
+    @PostMapping("/logout")
+    override fun logout(): ResponseEntity<BaseResponse<Unit>>{
+        authService.logout()
+        return BaseResponse.of(null, HttpStatus.OK.value())
+    }
 }
