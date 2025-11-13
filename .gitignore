@@ -38,3 +38,14 @@ out/
 
 ### Kotlin ###
 .kotlin
+
+### Environment Variables ###
+.env
+.env.local
+.env.*.local
+
+### Sensitive Configuration ###
+application-secret.yml
+application-local.yml
+**/resources/application-prod.yml
+

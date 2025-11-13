@@ -16,7 +16,7 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: create
     database-platform: org.hibernate.dialect.MySQLDialect
     properties:
       hibernate:
@@ -33,3 +33,7 @@ jwt:
   secret-key: ${JWT_SECRET_KEY}
   access-token-expiration: 3600000
   refresh-token-expiration: 4380000000
+
+security:
+  dummy-password-hash: ${DUMMY_PASSWORD_HASH}
+
