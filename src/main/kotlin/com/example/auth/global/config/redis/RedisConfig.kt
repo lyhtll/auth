@@ -1,5 +1,7 @@
 package com.example.auth.global.config.redis
 
+import io.lettuce.core.RedisClient
+import io.lettuce.core.RedisURI
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -22,6 +24,20 @@ class RedisConfig(
             config.setPassword(password)
         }
         return LettuceConnectionFactory(config)
+    }
+
+    @Bean
+    fun redisClient(): RedisClient {
+        val redisURI = RedisURI.builder()
+            .withHost(host)
+            .withPort(port)
+            .apply {
+                if (password.isNotBlank()) {
+                    withPassword(password.toCharArray())
+                }
+            }
+            .build()
+        return RedisClient.create(redisURI)
     }
 
     @Bean

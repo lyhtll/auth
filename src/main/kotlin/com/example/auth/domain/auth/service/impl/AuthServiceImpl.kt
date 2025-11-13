@@ -1,8 +1,10 @@
 package com.example.auth.domain.auth.service.impl
 
+import com.example.auth.domain.auth.domain.BlacklistToken
 import com.example.auth.domain.auth.dto.request.LoginRequest
 import com.example.auth.domain.auth.dto.request.ReissueRequest
 import com.example.auth.domain.auth.dto.request.SignUpRequest
+import com.example.auth.domain.auth.repository.BlacklistTokenRepository
 import com.example.auth.domain.auth.repository.RefreshTokenRepository
 import com.example.auth.domain.auth.service.AuthService
 import com.example.auth.domain.user.domain.User
@@ -26,12 +28,11 @@ class AuthServiceImpl(
     private val passwordEncoder: PasswordEncoder,
     private val jwtProvider: JwtProvider,
     private val tokenRepository: RefreshTokenRepository,
-    private val securityUtil: SecurityUtil
+    private val securityUtil: SecurityUtil,
+    private val blacklistTokenRepository: BlacklistTokenRepository,
+    private val dummyPasswordHash: String
 ) : AuthService {
 
-    companion object {
-        private const val DUMMY_PASSWORD_HASH = "\$2a\$10\$dummyHashForTimingAttackPrevention"
-    }
 
     @Transactional
     override fun signup(request: SignUpRequest) : Unit {
@@ -52,7 +53,7 @@ class AuthServiceImpl(
         val user = userRepository.findByName(request.name)
 
         if (user == null) {
-            passwordEncoder.matches(request.password, DUMMY_PASSWORD_HASH)
+            passwordEncoder.matches(request.password, dummyPasswordHash)
             throw CustomException(UserError.INVALID_CREDENTIALS)
         }
 
@@ -60,9 +61,7 @@ class AuthServiceImpl(
             throw CustomException(UserError.INVALID_CREDENTIALS)
         }
 
-        val tokens = jwtProvider.generateAndSaveTokens(user.name, user.role)
-
-        return tokens
+        return jwtProvider.generateAndSaveTokens(user.name, user.role)
     }
 
     @Transactional
@@ -85,9 +84,13 @@ class AuthServiceImpl(
     override fun logout(): Unit {
         val username = securityUtil.getCurrentUser().name
         tokenRepository.deleteById(username)
-        validateTokenDeleted(username)
-    }
-    private fun validateTokenDeleted(username: String) {
+
+        val accessToken = securityUtil.getCurrentAccessToken()
+
+        val expiredAt = jwtProvider.extractExpiration(accessToken)
+        blacklistTokenRepository.save(
+            BlacklistToken(accessToken, expiredAt.time)
+        )
         if (tokenRepository.existsById(username)) {
             throw CustomException(JwtError.TOKEN_DELETE_FAILED)
         }
@@ -106,7 +109,6 @@ class AuthServiceImpl(
             throw CustomException(JwtError.INVALID_REFRESH_TOKEN)
         }
     }
-
 
     private fun findUserByName(name: String): User {
         return userRepository.findByName(name)

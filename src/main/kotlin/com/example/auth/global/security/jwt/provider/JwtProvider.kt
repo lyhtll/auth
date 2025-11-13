@@ -1,6 +1,7 @@
 package com.example.auth.global.security.jwt.provider
 
 import com.example.auth.domain.auth.domain.RefreshToken
+import com.example.auth.domain.auth.repository.BlacklistTokenRepository
 import com.example.auth.domain.auth.repository.RefreshTokenRepository
 import com.example.auth.domain.user.domain.UserRole
 import com.example.auth.domain.user.error.UserError
@@ -30,7 +31,8 @@ class JwtProvider(
     private val jwtProperties: JwtProperties,
     private val userCacheRepository: UserCacheRepository,
     private val tokenRepository: RefreshTokenRepository,
-    private val userRepository: UserRepository
+    private val userRepository: UserRepository,
+    private val blacklistTokenRepository: BlacklistTokenRepository
 ) {
     private val secretKey by lazy {
         Keys.hmacShaKeyFor(jwtProperties.secretKey.toByteArray())
@@ -114,11 +116,19 @@ class JwtProvider(
         }
     }
 
+    fun extractExpiration(token: String): Date {
+        return getClaims(token).expiration
+    }
+
     fun validateTokenType(token: String, expectedType: TokenType) {
         val actualType = extractTokenType(token)
         if (actualType != expectedType) {
             throw CustomException(JwtError.INVALID_TOKEN_TYPE)
         }
+    }
+
+    fun isBlacklisted(token: String): Boolean {
+        return blacklistTokenRepository.existsById(token)
     }
 
     fun getClaims(token: String): Claims {
@@ -137,6 +147,10 @@ class JwtProvider(
 
     fun getAuthentication(token: String): Authentication{
         validateTokenType(token, TokenType.ACCESS)
+
+        if (isBlacklisted(token)) {
+            throw CustomException(JwtError.BLACKLISTED_TOKEN)
+        }
 
         val username = extractUsername(token)
         val role = extractRole(token)

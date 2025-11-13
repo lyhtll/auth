@@ -13,5 +13,7 @@ enum class JwtError(
     MALFORMED_TOKEN(HttpStatus.UNAUTHORIZED.value(), "Malformed JWT token"),
     INVALID_TOKEN_TYPE(HttpStatus.UNAUTHORIZED.value(), "Invalid token type"),
     INVALID_REFRESH_TOKEN(HttpStatus.UNAUTHORIZED.value(), "Invalid refresh token"),
-    TOKEN_DELETE_FAILED(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Failed to delete token")
+    TOKEN_DELETE_FAILED(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Failed to delete token"),
+    BLACKLISTED_TOKEN(HttpStatus.UNAUTHORIZED.value(), "Blacklisted token"),
+    TOKEN_NOT_FOUND(HttpStatus.UNAUTHORIZED.value(), "Token not found")
 }
