@@ -11,6 +11,7 @@ import com.example.auth.domain.user.domain.User
 import com.example.auth.domain.user.domain.UserRole
 import com.example.auth.domain.user.error.UserError
 import com.example.auth.domain.user.repository.UserRepository
+import com.example.auth.domain.user.repository.findByNameOrThrow
 import com.example.auth.global.error.CustomException
 import com.example.auth.global.security.jwt.error.JwtError
 import com.example.auth.global.security.jwt.provider.JwtProvider
@@ -74,7 +75,7 @@ class AuthServiceImpl(
 
         validateRefreshToken(username, refreshToken)
 
-        val user = findUserByName(username)
+        val user = userRepository.findByNameOrThrow(username)
         val tokens = jwtProvider.generateAndSaveTokens(user.name, user.role)
 
         return tokens
@@ -108,11 +109,6 @@ class AuthServiceImpl(
             )) {
             throw CustomException(JwtError.INVALID_REFRESH_TOKEN)
         }
-    }
-
-    private fun findUserByName(name: String): User {
-        return userRepository.findByName(name)
-            ?: throw CustomException(UserError.USER_NOT_FOUND)
     }
 
     private fun validateUsernameNotExists(name: String) {

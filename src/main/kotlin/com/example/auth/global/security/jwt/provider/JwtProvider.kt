@@ -4,9 +4,9 @@ import com.example.auth.domain.auth.domain.RefreshToken
 import com.example.auth.domain.auth.repository.BlacklistTokenRepository
 import com.example.auth.domain.auth.repository.RefreshTokenRepository
 import com.example.auth.domain.user.domain.UserRole
-import com.example.auth.domain.user.error.UserError
 import com.example.auth.domain.user.repository.UserCacheRepository
 import com.example.auth.domain.user.repository.UserRepository
+import com.example.auth.domain.user.repository.findByNameOrThrow
 import com.example.auth.global.error.CustomException
 import com.example.auth.global.security.jwt.error.JwtError
 import com.example.auth.global.security.jwt.properties.JwtProperties
@@ -156,9 +156,8 @@ class JwtProvider(
         val role = extractRole(token)
 
         val user = userCacheRepository.findByUsername(username)
-            ?: userRepository.findByName(username)
-                ?.also { userCacheRepository.save(it) }
-            ?: throw CustomException(UserError.USER_NOT_FOUND)
+            ?: userRepository.findByNameOrThrow(username)
+                .also { userCacheRepository.save(it) }
 
         val details = CustomUserDetails(user)
         return UsernamePasswordAuthenticationToken(details,null ,details.authorities)

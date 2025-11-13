@@ -3,6 +3,7 @@ package com.example.auth.global.security.util
 import com.example.auth.domain.user.domain.User
 import com.example.auth.domain.user.error.UserError
 import com.example.auth.domain.user.repository.UserRepository
+import com.example.auth.domain.user.repository.findByNameOrThrow
 import com.example.auth.global.error.CustomException
 import com.example.auth.global.security.jwt.error.JwtError
 import jakarta.servlet.http.HttpServletRequest
@@ -20,8 +21,7 @@ class SecurityUtil(
             ?: throw CustomException(UserError.USER_NOT_FOUND)
 
         val username = authentication.name
-        return userRepository.findByName(username)
-            ?: throw CustomException(UserError.USER_NOT_FOUND)
+        return userRepository.findByNameOrThrow(username)
     }
 
     fun getCurrentAccessToken(): String {
