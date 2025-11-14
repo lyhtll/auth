@@ -1,6 +1,7 @@
 package com.example.auth.global.security.jwt.filter
 
 import com.example.auth.global.security.jwt.provider.JwtProvider
+import com.example.auth.global.security.jwt.util.CookieUtil
 import jakarta.servlet.FilterChain
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
@@ -10,7 +11,8 @@ import org.springframework.web.filter.OncePerRequestFilter
 
 @Component
 class JwtAuthenticationFilter(
-    private val jwtProvider: JwtProvider
+    private val jwtProvider: JwtProvider,
+    private val cookieUtil: CookieUtil
 ) : OncePerRequestFilter() {
 
     override fun doFilterInternal(
@@ -19,7 +21,8 @@ class JwtAuthenticationFilter(
         filterChain: FilterChain
     ) {
         try {
-            val token = jwtProvider.extractToken(request)
+            val token = cookieUtil.getAccessTokenFromCookie(request)
+                ?: jwtProvider.extractToken(request)
 
             token?.let {
                 val authentication = jwtProvider.getAuthentication(it)
