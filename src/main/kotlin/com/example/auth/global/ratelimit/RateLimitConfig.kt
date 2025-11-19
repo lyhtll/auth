@@ -1,4 +1,4 @@
-package com.example.auth.global.config.ratelimit
+package com.example.auth.global.ratelimit
 
 import io.github.bucket4j.Bandwidth
 import io.github.bucket4j.BucketConfiguration

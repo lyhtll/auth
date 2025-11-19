@@ -1,8 +1,8 @@
 package com.example.auth.global.interceptor
 
-import com.example.auth.global.config.ratelimit.RateLimitConfig
+import com.example.auth.global.ratelimit.RateLimitConfig
 import com.example.auth.global.error.ErrorResponse
-import com.example.auth.global.error.RateLimitError
+import com.example.auth.global.ratelimit.RateLimitError
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.github.bucket4j.distributed.proxy.ProxyManager
 import jakarta.servlet.http.HttpServletRequest
