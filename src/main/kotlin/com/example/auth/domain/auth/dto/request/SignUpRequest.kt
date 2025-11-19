@@ -11,10 +11,5 @@ data class SignUpRequest(
     val name: String,
     @field:NotBlank(message = "비밀번호는 필수입니다")
     @field:Size(min = 8, max = 32, message = "비밀번호는 8~32자여야 합니다")
-    val password: String,
-    @field:NotNull(message = "학번은 필수입니다")
-    @field:Positive(message = "학번은 양수여야 합니다")
-    val studentId: Int,
-    @field:NotBlank(message = "실명은 필수입니다")
-    val realName: String
+    val password: String
 )

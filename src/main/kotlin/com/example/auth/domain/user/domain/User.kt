@@ -13,8 +13,5 @@ class User(
     @Column(nullable = false)
     val password: String,
     @Enumerated(EnumType.STRING)
-    val role: UserRole,
-    val studentId: Int,
-    @Column(nullable = false)
-    val realName: String
+    val role: UserRole
     )

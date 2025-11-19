@@ -41,9 +41,7 @@ class AuthService(
         val user = User(
             name = request.name,
             password = passwordEncoder.encode(request.password),
-            role = UserRole.STUDENT,
-            realName = request.realName,
-            studentId = request.studentId
+            role = UserRole.USER
         )
         userRepository.save(user)
     }
