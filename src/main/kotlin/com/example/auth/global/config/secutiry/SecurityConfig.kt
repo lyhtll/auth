@@ -1,5 +1,7 @@
 package com.example.auth.global.config.secutiry
 
+import com.example.auth.global.config.properties.SecurityProperties
+import com.example.auth.global.security.csrf.CsrfHeaderFilter
 import com.example.auth.global.security.jwt.filter.JwtAuthenticationFilter
 import com.example.auth.global.security.jwt.filter.JwtExceptionFilter
 import com.example.auth.global.security.jwt.handler.JwtAccessDeniedHandler
@@ -14,6 +16,9 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.security.web.SecurityFilterChain
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter
+import org.springframework.security.web.csrf.CookieCsrfTokenRepository
+import org.springframework.security.web.csrf.CsrfFilter
+import org.springframework.security.web.csrf.XorCsrfTokenRequestAttributeHandler
 import org.springframework.web.cors.CorsConfigurationSource
 
 @Configuration
@@ -23,20 +28,30 @@ class SecurityConfig(
     private val jwtExceptionFilter: JwtExceptionFilter,
     private val jwtAuthenticationEntryPoint: JwtAuthenticationEntryPoint,
     private val jwtAccessDeniedHandler: JwtAccessDeniedHandler,
+    private val securityProperties: SecurityProperties
 ) {
-    @Value("\${security.dummy-password-hash}")
-    private lateinit var dummyPasswordHash: String
 
     @Bean
     fun passwordEncoder(): PasswordEncoder = BCryptPasswordEncoder()
 
     @Bean
-    fun dummyPasswordHash(): String = dummyPasswordHash
+    fun dummyPasswordHash(): String = securityProperties.dummyPasswordHash
 
     @Bean
     fun securityFilterChain(http: HttpSecurity): SecurityFilterChain {
         http
-            .csrf { it.disable() }
+            .csrf {
+                    csrf ->
+                csrf.csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
+                    .csrfTokenRequestHandler(XorCsrfTokenRequestAttributeHandler())
+                    .ignoringRequestMatchers(
+                        "/auth/signup",
+                        "/auth/login",
+                        "/auth/reissue",
+                        "/swagger-ui/**",
+                        "/v3/api-docs/**"
+                    )
+            }
             .cors {}
             .formLogin { it.disable() }
             .httpBasic { it.disable() }
@@ -50,6 +65,7 @@ class SecurityConfig(
                     .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
                     .anyRequest().authenticated()
             }
+            .addFilterAfter(CsrfHeaderFilter(), CsrfFilter::class.java)
             .addFilterBefore(jwtExceptionFilter, UsernamePasswordAuthenticationFilter::class.java)
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter::class.java)
             .headers { headers ->
