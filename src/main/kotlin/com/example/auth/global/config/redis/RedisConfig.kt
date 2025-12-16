@@ -1,8 +1,9 @@
 package com.example.auth.global.config.redis
 
+import com.example.auth.global.config.properties.RedisProperties
 import io.lettuce.core.RedisClient
 import io.lettuce.core.RedisURI
-import org.springframework.beans.factory.annotation.Value
+import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.data.redis.connection.RedisConnectionFactory
@@ -12,16 +13,15 @@ import org.springframework.data.redis.core.RedisTemplate
 import org.springframework.data.redis.serializer.StringRedisSerializer
 
 @Configuration
+@EnableConfigurationProperties(RedisProperties::class)
 class RedisConfig(
-    @Value("\${spring.data.redis.host}") private val host: String,
-    @Value("\${spring.data.redis.port}") private val port: Int,
-    @Value("\${spring.data.redis.password}") private val password: String
+    private val redisProperties: RedisProperties
 ) {
     @Bean
     fun redisConnectionFactory(): RedisConnectionFactory {
-        val config = RedisStandaloneConfiguration(host, port)
-        if (password.isNotBlank()) {
-            config.setPassword(password)
+        val config = RedisStandaloneConfiguration(redisProperties.host, redisProperties.port)
+        if (redisProperties.password.isNotBlank()) {
+            config.setPassword(redisProperties.password)
         }
         return LettuceConnectionFactory(config)
     }
@@ -29,11 +29,11 @@ class RedisConfig(
     @Bean
     fun redisClient(): RedisClient {
         val redisURI = RedisURI.builder()
-            .withHost(host)
-            .withPort(port)
+            .withHost(redisProperties.host)
+            .withPort(redisProperties.port)
             .apply {
-                if (password.isNotBlank()) {
-                    withPassword(password.toCharArray())
+                if (redisProperties.password.isNotBlank()) {
+                    withPassword(redisProperties.password.toCharArray())
                 }
             }
             .build()
