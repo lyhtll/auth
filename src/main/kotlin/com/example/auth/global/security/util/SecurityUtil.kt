@@ -9,6 +9,7 @@ import com.example.auth.global.security.jwt.error.JwtError
 import com.example.auth.global.security.jwt.util.CookieUtil
 import jakarta.servlet.http.HttpServletRequest
 import org.springframework.security.core.context.SecurityContextHolder
+import org.springframework.security.oauth2.jwt.Jwt
 import org.springframework.stereotype.Component
 import org.springframework.web.context.request.RequestContextHolder
 import org.springframework.web.context.request.ServletRequestAttributes
@@ -18,11 +19,16 @@ class SecurityUtil(
     private val userRepository: UserRepository,
     private val cookieUtil: CookieUtil
 ) {
-    fun getCurrentUser(): User{
+    fun getCurrentUser(): User {
         val authentication = SecurityContextHolder.getContext().authentication
             ?: throw CustomException(UserError.USER_NOT_FOUND)
 
-        val username = authentication.name
+        val username = when (val principal = authentication.principal) {
+            is Jwt -> principal.subject
+            is String -> principal
+            else -> authentication.name
+        } ?: throw CustomException(UserError.USER_NOT_FOUND)
+
         return userRepository.findByNameOrThrow(username)
     }
 
@@ -32,7 +38,7 @@ class SecurityUtil(
         // 1. 쿠키에서 토큰 추출 시도
         cookieUtil.getAccessTokenFromCookie(request)?.let { return it }
 
-        // 2. Authorization 헤더에서 추출 (하위 호환성)
+        // 2. Authorization 헤더에서 추출
         val authHeader = request.getHeader("Authorization")
             ?: throw CustomException(JwtError.TOKEN_NOT_FOUND)
 
