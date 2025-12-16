@@ -4,6 +4,7 @@ import com.example.auth.domain.auth.domain.BlacklistToken
 import com.example.auth.domain.auth.dto.request.LoginRequest
 import com.example.auth.domain.auth.dto.request.ReissueRequest
 import com.example.auth.domain.auth.dto.request.SignUpRequest
+import com.example.auth.domain.auth.error.AuthError
 import com.example.auth.domain.auth.repository.BlacklistTokenRepository
 import com.example.auth.domain.auth.repository.RefreshTokenRepository
 import com.example.auth.domain.user.domain.User
@@ -35,19 +36,23 @@ class AuthService(
 
 
     @Transactional
-     fun signup(request: SignUpRequest) : Unit {
+    fun signup(request: SignUpRequest) {
         validateUsernameNotExists(request.name)
+
+        val encoded = requireNotNull(passwordEncoder.encode(request.password)) {
+            throw CustomException(AuthError.PASSWORD_ENCODER_ERROR)
+        }
 
         val user = User(
             name = request.name,
-            password = passwordEncoder.encode(request.password),
+            password = encoded,
             role = UserRole.USER
         )
         userRepository.save(user)
     }
 
     @Transactional
-     fun login(request: LoginRequest): TokenResponse {
+    fun login(request: LoginRequest): TokenResponse {
         val user = userRepository.findByName(request.name)
 
         if (user == null) {
@@ -79,7 +84,7 @@ class AuthService(
     }
 
     @Transactional
-     fun logout(): Unit {
+    fun logout() {
         val username = securityUtil.getCurrentUser().name
         tokenRepository.deleteById(username)
 
@@ -87,7 +92,7 @@ class AuthService(
 
         val expiredAt = jwtProvider.extractExpiration(accessToken)
         blacklistTokenRepository.save(
-            BlacklistToken(accessToken, expiredAt.time)
+            BlacklistToken(accessToken, expiredAt.toEpochMilli())
         )
         if (tokenRepository.existsById(username)) {
             throw CustomException(JwtError.TOKEN_DELETE_FAILED)

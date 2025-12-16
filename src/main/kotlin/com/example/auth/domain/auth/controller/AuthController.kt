@@ -4,13 +4,13 @@ import com.example.auth.domain.auth.docs.AuthDocs
 import com.example.auth.domain.auth.dto.request.LoginRequest
 import com.example.auth.domain.auth.dto.request.ReissueRequest
 import com.example.auth.domain.auth.dto.request.SignUpRequest
+import com.example.auth.domain.auth.error.AuthError
 import com.example.auth.domain.auth.service.AuthService
 import com.example.auth.global.common.BaseResponse
 import com.example.auth.global.config.properties.SecurityProperties
 import com.example.auth.global.error.CustomException
 import com.example.auth.global.security.jwt.response.TokenResponse
 import com.example.auth.global.security.jwt.util.CookieUtil
-import com.example.let_v2.domain.auth.error.AuthError
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
 import jakarta.validation.Valid
