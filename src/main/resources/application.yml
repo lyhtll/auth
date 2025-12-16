@@ -32,7 +32,8 @@ spring:
       password: ${REDIS_PASSWORD}
 
 jwt:
-  secret-key: ${JWT_SECRET_KEY}
+  public-key: ${JWT_PUBLIC_KEY}
+  private-key: ${JWT_PRIVATE_KEY}
   access-token-expiration: 3600000
   refresh-token-expiration: 604800000
 
@@ -46,3 +47,17 @@ cors:
 security:
   app-secret: ${APP_SECRET_KEY}
   dummy-password-hash: ${DUMMY_PASSWORD_HASH}
+  rate-limit:
+    login:
+      capacity: 5           # 최대 5회 시도
+      refill-tokens: 5      # 5개 토큰 재충전
+      refill-period: 60     # 60초마다 재충전
+    signup:
+      capacity: 3           # 최대 3회 시도 (회원가입은 더 엄격하게)
+      refill-tokens: 3      # 3개 토큰 재충전
+      refill-period: 300    # 300초(5분)마다 재충전
+    reissue:
+      capacity: 10          # 최대 10회 시도 (토큰 갱신은 좀 더 여유있게)
+      refill-tokens: 10     # 10개 토큰 재충전
+      refill-period: 60     # 60초마다 재충전
+
